@@ -28,6 +28,7 @@ export default function Home() {
   const comedyMovies = catalog.filter((t) => t.genres.some(g => g.toLowerCase() === 'comedy'));
   const romanceMovies = catalog.filter((t) => t.genres.some(g => g.toLowerCase() === 'romance'));
   const horrorMovies = catalog.filter((t) => t.genres.some(g => ['horror', 'thriller'].includes(g.toLowerCase())));
+  const liveChannels = catalog.filter((t) => t.type === 'live' || t.genres.includes('Live TV') || t.genres.includes('News'));
 
   return (
     <div className="pb-16">
@@ -36,16 +37,16 @@ export default function Home() {
       {/* Premium Cinematic Glowing Wave Divider */}
       <div className="relative z-20 mt-2 sm:mt-4 pointer-events-none w-full overflow-hidden select-none">
         <svg
-          className="w-full h-12 sm:h-16 lg:h-24 text-ink-975 filter drop-shadow-[0_-8px_20px_rgba(139,92,246,0.3)]"
+          className="w-full h-12 sm:h-16 lg:h-24 text-ink-975 filter drop-shadow-[0_-8px_20px_rgba(245,158,11,0.4)]"
           viewBox="0 0 1440 80"
           preserveAspectRatio="none"
         >
           <defs>
             <linearGradient id="neon-gradient" x1="0%" y1="0%" x2="100%" y2="0%">
               <stop offset="0%" stopColor="#E50914" />
-              <stop offset="30%" stopColor="#D946EF" />
-              <stop offset="50%" stopColor="#8B5CF6" />
-              <stop offset="70%" stopColor="#3B82F6" />
+              <stop offset="25%" stopColor="#F59E0B" />
+              <stop offset="50%" stopColor="#FACC15" />
+              <stop offset="75%" stopColor="#F59E0B" />
               <stop offset="100%" stopColor="#E50914" />
             </linearGradient>
             <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
@@ -89,13 +90,18 @@ export default function Home() {
         </svg>
 
         {/* Ambient background light flare */}
-        <div className="absolute top-4 left-1/4 w-1/4 h-12 bg-pink-500/10 blur-[40px] rounded-full" />
-        <div className="absolute top-2 left-1/2 -translate-x-1/2 w-1/3 h-16 bg-violet-600/15 blur-[60px] rounded-full" />
-        <div className="absolute top-4 right-1/4 w-1/4 h-12 bg-blue-500/10 blur-[40px] rounded-full" />
+        <div className="absolute top-4 left-1/4 w-1/4 h-12 bg-red-600/15 blur-[40px] rounded-full" />
+        <div className="absolute top-2 left-1/2 -translate-x-1/2 w-1/3 h-16 bg-amber-500/20 blur-[60px] rounded-full" />
+        <div className="absolute top-4 right-1/4 w-1/4 h-12 bg-yellow-500/15 blur-[40px] rounded-full" />
       </div>
 
       <div className="relative z-10 page-shell -mt-2 sm:-mt-3 lg:-mt-4">
         <div className="space-y-4 sm:space-y-5">
+          {liveChannels.length > 0 && (
+            <div id="row-live-tv">
+              <ContentRow title="🔴 Live TV & News Channels" titles={liveChannels} variant="large" />
+            </div>
+          )}
           {continueTitles.length > 0 && (
             <div id="row-continue">
               <ContentRow title="Continue Watching" titles={continueTitles} />

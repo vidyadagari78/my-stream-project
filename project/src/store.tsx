@@ -1,6 +1,6 @@
 import { createContext, useContext, useState, useEffect, useCallback, type ReactNode } from 'react';
-import type { Profile, Title } from './types';
-import { PROFILES, TITLES } from './data';
+import type { Profile, Title, LiveChannel } from './types';
+import { PROFILES, TITLES, LIVE_CHANNELS } from './data';
 import api from './api';
 
 export type Route =
@@ -44,6 +44,8 @@ interface AppState {
   refreshCatalog: () => void;
   catalog: Title[];
   setCatalog: React.Dispatch<React.SetStateAction<Title[]>>;
+  liveChannels: LiveChannel[];
+  setLiveChannels: React.Dispatch<React.SetStateAction<LiveChannel[]>>;
   plan: string;
   setPlan: (p: string) => void;
 }
@@ -51,7 +53,20 @@ interface AppState {
 const AppCtx = createContext<AppState | null>(null);
 
 export function AppProvider({ children }: { children: ReactNode }) {
-  const [stack, setStack] = useState<Route[]>([{ name: 'splash' }]);
+  const [isAuthed, setAuthedState] = useState(() => localStorage.getItem('is_authed') === 'true');
+
+  const setAuthed = useCallback((v: boolean) => {
+    setAuthedState(v);
+    if (v) {
+      localStorage.setItem('is_authed', 'true');
+    } else {
+      localStorage.removeItem('is_authed');
+    }
+  }, []);
+
+  const [stack, setStack] = useState<Route[]>(() =>
+    localStorage.getItem('is_authed') === 'true' ? [{ name: 'home' }] : [{ name: 'onboarding' }]
+  );
   const [profile, setProfileState] = useState<Profile | null>(PROFILES[0]);
   const [favorites, setFavorites] = useState<string[]>(['t1', 't4']);
   const [watchlist, setWatchlist] = useState<string[]>(['t3']);
@@ -60,12 +75,12 @@ export function AppProvider({ children }: { children: ReactNode }) {
     { id: 't4', progress: 23 },
     { id: 't1', progress: 88 },
   ]);
-  const [isAuthed, setAuthed] = useState(false);
   const [plan, setPlan] = useState<string>('free');
   const [catalogVersion, setCatalogVersion] = useState(0);
   const [catalog, setCatalog] = useState<Title[]>(
     TITLES.filter((item, index, self) => index === self.findIndex((t) => t.id === item.id || t.title.toLowerCase() === item.title.toLowerCase()))
   );
+  const [liveChannels, setLiveChannels] = useState<LiveChannel[]>(LIVE_CHANNELS);
 
   const refreshCatalog = useCallback(() => {
     setCatalogVersion((v) => v + 1);
@@ -202,6 +217,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
     refreshCatalog,
     catalog,
     setCatalog,
+    liveChannels,
+    setLiveChannels,
     plan,
     setPlan,
   };

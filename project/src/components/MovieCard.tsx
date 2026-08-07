@@ -11,6 +11,22 @@ interface Props {
   progress?: number;
 }
 
+const RANDOM_POSTERS = [
+  'https://images.unsplash.com/photo-1536440136628-849c177e76a1?w=800&auto=format&fit=crop&q=80',
+  'https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?w=800&auto=format&fit=crop&q=80',
+  'https://images.unsplash.com/photo-1517604931442-7e0c8ed2963c?w=800&auto=format&fit=crop&q=80',
+  'https://images.unsplash.com/photo-1585829365295-ab7cd400c167?w=800&auto=format&fit=crop&q=80',
+  'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=800&auto=format&fit=crop&q=80',
+  'https://images.unsplash.com/photo-1574375927938-d5a98e8ffe85?w=800&auto=format&fit=crop&q=80',
+  'https://images.unsplash.com/photo-1478760329108-5c3ed9d495a0?w=800&auto=format&fit=crop&q=80',
+  'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=800&auto=format&fit=crop&q=80',
+];
+
+const getFallbackPoster = (id: string) => {
+  const hash = (id || '').split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+  return RANDOM_POSTERS[hash % RANDOM_POSTERS.length];
+};
+
 export default function MovieCard({ title, size = 'default', rank, progress }: Props) {
   const { navigate, favorites, toggleFavorite, watchlist, toggleWatchlist } = useApp();
   const [hovered, setHovered] = useState(false);
@@ -19,6 +35,8 @@ export default function MovieCard({ title, size = 'default', rank, progress }: P
 
   const w = 'w-[140px] sm:w-[170px] lg:w-[190px]';
   const ar = 'aspect-[2/3]';
+
+  const posterSrc = title.poster && title.poster.trim() !== '' ? title.poster : getFallbackPoster(title.id);
 
   return (
     <div
@@ -56,17 +74,17 @@ export default function MovieCard({ title, size = 'default', rank, progress }: P
             <div className="text-[9px] text-white/50 text-left">{title.year} • {title.rating || 'U/A 16+'}</div>
           </div>
 
-          {title.poster && (
-            <img
-              src={title.poster}
-              alt={title.title}
-              loading="lazy"
-              className="absolute inset-0 w-full h-full object-cover z-10 transition-opacity duration-300"
-              onError={(e) => {
-                (e.target as HTMLImageElement).style.display = 'none';
-              }}
-            />
-          )}
+          <img
+            src={posterSrc}
+            alt={title.title}
+            loading="lazy"
+            className="absolute inset-0 w-full h-full object-cover z-10 transition-opacity duration-300"
+            onError={(e) => {
+              const imgEl = e.currentTarget as HTMLImageElement;
+              imgEl.src = getFallbackPoster(title.id + '_err');
+              imgEl.onerror = null;
+            }}
+          />
 
           {/* Badges */}
           <div className="absolute top-2 left-2 flex flex-col gap-1 z-20">

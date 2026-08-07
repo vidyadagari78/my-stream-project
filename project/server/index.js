@@ -321,6 +321,32 @@ const server = http.createServer((req, res) => {
       return;
     }
 
+    // GET /api/iptv/fetch?url=...
+    if (req.method === 'GET' && pathname === '/api/iptv/fetch') {
+      const targetUrl = url.searchParams.get('url');
+      if (!targetUrl) {
+        res.writeHead(400, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ error: 'Missing target url parameter' }));
+        return;
+      }
+
+      fetch(targetUrl)
+        .then((response) => {
+          if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+          return response.text();
+        })
+        .then((data) => {
+          res.writeHead(200, { 'Content-Type': 'text/plain; charset=utf-8' });
+          res.end(data);
+        })
+        .catch((err) => {
+          console.error('IPTV proxy fetch error:', err);
+          res.writeHead(500, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify({ error: err.message }));
+        });
+      return;
+    }
+
     // POST /api/upload
     if (req.method === 'POST' && pathname === '/api/upload') {
       const UPLOADS_DIR = path.join(__dirname, '..', 'public', 'uploads');

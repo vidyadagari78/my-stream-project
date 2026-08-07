@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Mail, Lock, Eye, EyeOff, ArrowRight, Phone, Apple, ChevronLeft, Check } from 'lucide-react';
+import { Mail, Lock, Eye, EyeOff, ArrowRight, Phone, Apple, ChevronLeft, Check, User } from 'lucide-react';
 import { useApp, PROFILES } from '../store';
 import api from '../api';
 
@@ -105,6 +105,28 @@ export default function Auth({ mode }: { mode: Mode }) {
                 </div>
               )}
 
+              {/* Mode Switcher Tabs */}
+              <div className="flex rounded-xl bg-white/5 p-1 mt-6 mb-2 border border-white/10">
+                <button
+                  type="button"
+                  onClick={() => { setM('login'); setError(''); }}
+                  className={`flex-1 py-2.5 rounded-lg text-xs sm:text-sm font-bold transition-all cursor-pointer ${
+                    m === 'login' ? 'brand-gradient text-white shadow-md' : 'text-white/60 hover:text-white'
+                  }`}
+                >
+                  Sign In
+                </button>
+                <button
+                  type="button"
+                  onClick={() => { setM('signup'); setError(''); }}
+                  className={`flex-1 py-2.5 rounded-lg text-xs sm:text-sm font-bold transition-all cursor-pointer ${
+                    m === 'signup' ? 'brand-gradient text-white shadow-md' : 'text-white/60 hover:text-white'
+                  }`}
+                >
+                  Register Account
+                </button>
+              </div>
+
               {otpSent ? (
                 <div className="mt-7">
                   <p className="text-sm text-white/70 mb-4">Enter the 6-digit code sent to your email</p>
@@ -141,11 +163,11 @@ export default function Auth({ mode }: { mode: Mode }) {
                   </button>
                 </div>
               ) : (
-                <form onSubmit={submit} className="mt-7 space-y-4">
+                <form onSubmit={submit} className="mt-5 space-y-4">
                   {m === 'signup' && (
-                    <Field label="Full name" type="text" placeholder="Alex Carter" icon={<Mail size={18} />} value={fullName} onChange={(e) => setFullName(e.target.value)} />
+                    <Field label="Full Name / Username" type="text" placeholder="vidyadagari78" icon={<User size={18} />} value={fullName} onChange={(e) => setFullName(e.target.value)} />
                   )}
-                  <Field label="Email" type="email" placeholder="you@email.com" icon={<Mail size={18} />} value={email} onChange={(e) => setEmail(e.target.value)} />
+                  <Field label="Email Address" type="email" placeholder="you@domain.com" icon={<Mail size={18} />} value={email} onChange={(e) => setEmail(e.target.value)} />
                   {m !== 'forgot' && (
                     <div className="relative">
                       <Field
@@ -215,12 +237,72 @@ export default function Auth({ mode }: { mode: Mode }) {
                           if (p.label === 'OTP') { setM('forgot'); setOtpSent(true); }
                           else { setAuthed(true); setProfile(PROFILES[0]); navigate({ name: 'home' }); }
                         }}
-                        className="flex items-center justify-center gap-2 py-3 rounded-xl glass border border-white/15 hover:bg-white/10 transition-colors text-sm font-medium"
+                        className="flex items-center justify-center gap-2 py-3 rounded-xl glass border border-white/15 hover:bg-white/10 transition-colors text-sm font-medium cursor-pointer"
                       >
                         {p.icon}
                         <span className="hidden sm:inline">{p.label}</span>
                       </button>
                     ))}
+                  </div>
+
+                  {/* Quick Previous Accounts Login */}
+                  <div className="mt-4 pt-4 border-t border-white/10">
+                    <p className="text-xs text-white/50 mb-2 font-medium">Select Previous Saved Account:</p>
+                    <div className="flex flex-col gap-2">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setEmail('vidyadagari78@gmail.com');
+                          setPassword('••••••••');
+                          setAuthed(true);
+                          setProfile(PROFILES[0]);
+                          navigate({ name: 'home' });
+                        }}
+                        className="w-full flex items-center justify-between px-3 py-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-xs font-semibold text-white transition-all cursor-pointer"
+                      >
+                        <div className="flex items-center gap-2">
+                          <span className="w-6 h-6 rounded-full bg-brand-500 flex items-center justify-center font-bold text-[10px]">V</span>
+                          <span className="truncate">vidyadagari78@gmail.com</span>
+                        </div>
+                        <span className="text-[10px] text-amber-400 font-bold bg-amber-400/10 px-2 py-0.5 rounded">Active Account</span>
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setEmail('vidya@gmail.com');
+                          setPassword('••••••••');
+                          setAuthed(true);
+                          setProfile(PROFILES[0]);
+                          navigate({ name: 'home' });
+                        }}
+                        className="w-full flex items-center justify-between px-3 py-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-xs font-semibold text-white transition-all cursor-pointer"
+                      >
+                        <div className="flex items-center gap-2">
+                          <span className="w-6 h-6 rounded-full bg-blue-500 flex items-center justify-center font-bold text-[10px]">V</span>
+                          <span className="truncate">vidya@gmail.com</span>
+                        </div>
+                        <span className="text-[10px] text-blue-400 font-bold bg-blue-400/10 px-2 py-0.5 rounded">Subscriber</span>
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setEmail('shravya1ga22is144@gmail.com');
+                          setPassword('••••••••');
+                          setAuthed(true);
+                          setProfile(PROFILES[0]);
+                          navigate({ name: 'home' });
+                        }}
+                        className="w-full flex items-center justify-between px-3 py-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-xs font-semibold text-white transition-all cursor-pointer"
+                      >
+                        <div className="flex items-center gap-2">
+                          <span className="w-6 h-6 rounded-full bg-purple-500 flex items-center justify-center font-bold text-[10px]">S</span>
+                          <span className="truncate">shravya1ga22is144@gmail.com</span>
+                        </div>
+                        <span className="text-[10px] text-purple-400 font-bold bg-purple-400/10 px-2 py-0.5 rounded">Subscriber</span>
+                      </button>
+                    </div>
                   </div>
 
                   <p className="mt-6 text-center text-sm text-white/60">

@@ -5,8 +5,9 @@ import {
   Check, Gauge, Loader2, Radio, Crown, Sparkles
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import Hls from 'hls.js';
 import { useApp } from '../store';
-import { getTitle, PLANS } from '../data';
+import { getTitle, PLANS, LIVE_CHANNELS } from '../data';
 
 type Quality = 'Auto' | '4K' | '1080p' | '720p' | '480p';
 type Speed = 0.5 | 0.75 | 1 | 1.25 | 1.5 | 2;
@@ -16,9 +17,64 @@ const SPEEDS: Speed[] = [0.5, 0.75, 1, 1.25, 1.5, 2];
 const SUBS = ['Off', 'English', 'Spanish', 'Hindi', 'Japanese', 'French'];
 const AUDIOS = ['English', 'Hindi', 'Spanish', 'Japanese'];
 
+import type { Title } from '../types';
+
 export default function Player({ id, episodeId }: { id: string; episodeId?: string }) {
-  const { catalog, back, navigate, setProgress, plan } = useApp();
-  const title = catalog.find((t) => t.id === id);
+  const { catalog, liveChannels, back, navigate, setProgress, plan } = useApp();
+  
+  // Find live channel from store liveChannels, static LIVE_CHANNELS, or localStorage
+  const savedChannel = (() => {
+    try {
+      const raw = localStorage.getItem('last_played_channel_' + id);
+      return raw ? JSON.parse(raw) : null;
+    } catch { return null; }
+  })();
+
+  const liveCh = liveChannels?.find((ch) => ch.id === id) || 
+                 LIVE_CHANNELS.find((ch) => ch.id === id) || 
+                 savedChannel;
+
+  const title: Title | undefined = catalog.find((t) => t.id === id) || (liveCh ? ({
+    id: liveCh.id,
+    title: liveCh.name,
+    type: 'live' as const,
+    year: 2026,
+    rating: 'Live',
+    imdb: 9.5,
+    match: 99,
+    duration: 'Live 24x7',
+    genres: [liveCh.category || 'Live TV'],
+    languages: ['Hindi', 'Kannada', 'English'],
+    description: `${liveCh.nowPlaying || 'Live Stream'} (Up next: ${liveCh.nextUp || 'Continuous Broadcast'})`,
+    longDescription: `${liveCh.name} live broadcast streaming live with ${liveCh.viewers || '100K+'} active viewers.`,
+    cast: ['Live TV Anchors'],
+    director: liveCh.name,
+    studio: 'Live TV Network',
+    poster: liveCh.backdrop || liveCh.logo,
+    backdrop: liveCh.backdrop || liveCh.logo,
+    videoUrl: liveCh.videoUrl || 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/TearsOfSteel.mp4',
+    isPremium: false,
+  } as Title) : (id.startsWith('http') || id.includes('/') ? ({
+    id: id,
+    title: 'Live Stream Channel',
+    type: 'live' as const,
+    year: 2026,
+    rating: 'Live',
+    imdb: 9.0,
+    match: 95,
+    duration: 'Live Broadcast',
+    genres: ['Live TV'],
+    languages: ['English'],
+    description: 'Live broadcast streaming channel',
+    longDescription: 'Live TV broadcast stream',
+    cast: ['Live Anchors'],
+    director: 'Live TV',
+    studio: 'Live Network',
+    poster: 'https://images.unsplash.com/photo-1585829365295-ab7cd400c167?w=1200&auto=format&fit=crop&q=80',
+    backdrop: 'https://images.unsplash.com/photo-1585829365295-ab7cd400c167?w=1200&auto=format&fit=crop&q=80',
+    videoUrl: id,
+    isPremium: false,
+  } as Title) : undefined));
   const videoRef = useRef<HTMLVideoElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const hideTimer = useRef<number | undefined>(undefined);
@@ -47,8 +103,10 @@ export default function Player({ id, episodeId }: { id: string; episodeId?: stri
   const episode = title?.episodes?.find((e) => e.id === episodeId) || title?.episodes?.[0];
   const videoSrc = episode?.videoUrl || title?.videoUrl || '';
 
+  const isLiveStream = title?.type === 'live' || id.startsWith('l_') || id.includes('m3u') || !!liveCh;
+
   const togglePlay = useCallback(() => {
-    if (title?.isPremium && plan === 'free') {
+    if (!isLiveStream && title?.isPremium && plan === 'free') {
       setShowUpgradeModal(true);
       setUpgradeReason('premium');
       return;
@@ -57,10 +115,10 @@ export default function Player({ id, episodeId }: { id: string; episodeId?: stri
     if (!v) return;
     if (v.paused) v.play();
     else v.pause();
-  }, [title?.isPremium, plan]);
+  }, [title?.isPremium, plan, isLiveStream]);
 
   const seek = (t: number) => {
-    if (plan === 'free' && t >= 30) {
+    if (!isLiveStream && plan === 'free' && t >= 30) {
       const v = videoRef.current;
       if (v) {
         v.currentTime = 30;
@@ -78,7 +136,7 @@ export default function Player({ id, episodeId }: { id: string; episodeId?: stri
     const v = videoRef.current;
     if (!v) return;
     const target = v.currentTime + delta;
-    if (plan === 'free' && target >= 30) {
+    if (!isLiveStream && plan === 'free' && target >= 30) {
       v.currentTime = 30;
       v.pause();
       setShowUpgradeModal(true);
@@ -135,14 +193,24 @@ export default function Player({ id, episodeId }: { id: string; episodeId?: stri
     return () => window.removeEventListener('keydown', onKey);
   }, [togglePlay, toggleFullscreen, pingControls]);
 
+  // Reset loading timeout on source change
+  useEffect(() => {
+    setLoading(true);
+    const timer = setTimeout(() => {
+      setLoading(false);
+    }, 2200);
+    return () => clearTimeout(timer);
+  }, [videoSrc]);
+
   // Video events
   useEffect(() => {
     const v = videoRef.current;
     if (!v) return;
-    const onPlay = () => { setPlaying(true); pingControls(); };
+    const onPlay = () => { setPlaying(true); setLoading(false); pingControls(); };
     const onPause = () => setPlaying(false);
     const onTime = () => {
-      if (plan === 'free' && v.currentTime >= 30) {
+      setLoading(false);
+      if (!isLiveStream && plan === 'free' && v.currentTime >= 30) {
         v.pause();
         setPlaying(false);
         setShowUpgradeModal(true);
@@ -161,10 +229,15 @@ export default function Player({ id, episodeId }: { id: string; episodeId?: stri
     const onProg = () => {
       if (v.buffered.length) setBuffered(v.buffered.end(v.buffered.length - 1));
     };
-    const onWait = () => setLoading(true);
+    const onWait = () => setLoading(false); // don't block UI on minor network wait
     const onCanPlay = () => setLoading(false);
+    const onPlaying = () => setLoading(false);
+    const onLoadedData = () => setLoading(false);
     const onFs = () => setFullscreen(!!document.fullscreenElement);
+    
     v.addEventListener('play', onPlay);
+    v.addEventListener('playing', onPlaying);
+    v.addEventListener('loadeddata', onLoadedData);
     v.addEventListener('pause', onPause);
     v.addEventListener('timeupdate', onTime);
     v.addEventListener('durationchange', onDur);
@@ -174,6 +247,8 @@ export default function Player({ id, episodeId }: { id: string; episodeId?: stri
     document.addEventListener('fullscreenchange', onFs);
     return () => {
       v.removeEventListener('play', onPlay);
+      v.removeEventListener('playing', onPlaying);
+      v.removeEventListener('loadeddata', onLoadedData);
       v.removeEventListener('pause', onPause);
       v.removeEventListener('timeupdate', onTime);
       v.removeEventListener('durationchange', onDur);
@@ -182,7 +257,7 @@ export default function Player({ id, episodeId }: { id: string; episodeId?: stri
       v.removeEventListener('canplay', onCanPlay);
       document.removeEventListener('fullscreenchange', onFs);
     };
-  }, [id, setProgress, pingControls, plan]);
+  }, [id, setProgress, pingControls, plan, isLiveStream]);
 
   // Apply volume/mute/speed
   useEffect(() => {
@@ -193,9 +268,53 @@ export default function Player({ id, episodeId }: { id: string; episodeId?: stri
     v.playbackRate = speed;
   }, [volume, muted, speed]);
 
+  // HLS stream playback support
+  useEffect(() => {
+    const v = videoRef.current;
+    if (!v || !videoSrc) return;
+
+    let hls: Hls | null = null;
+    if (videoSrc.includes('.m3u8') || videoSrc.includes('m3u')) {
+      if (Hls.isSupported()) {
+        hls = new Hls({
+          enableWorker: true,
+          lowLatencyMode: true,
+        });
+        hls.loadSource(videoSrc);
+        hls.attachMedia(v);
+        hls.on(Hls.Events.MANIFEST_PARSED, () => {
+          v.play().catch(() => {});
+        });
+        hls.on(Hls.Events.ERROR, (_event, data) => {
+          if (data.fatal) {
+            switch (data.type) {
+              case Hls.ErrorTypes.NETWORK_ERROR:
+                hls?.startLoad();
+                break;
+              case Hls.ErrorTypes.MEDIA_ERROR:
+                hls?.recoverMediaError();
+                break;
+              default:
+                hls?.destroy();
+                break;
+            }
+          }
+        });
+      } else if (v.canPlayType('application/vnd.apple.mpegurl')) {
+        v.src = videoSrc;
+      }
+    }
+
+    return () => {
+      if (hls) {
+        hls.destroy();
+      }
+    };
+  }, [videoSrc]);
+
   // Subscription Tier Guard on mount
   useEffect(() => {
-    if (!title) return;
+    if (!title || isLiveStream) return;
     
     let isDenied = false;
     
@@ -246,14 +365,25 @@ export default function Player({ id, episodeId }: { id: string; episodeId?: stri
       }}
       onDoubleClick={toggleFullscreen}
     >
-      <video
-        ref={videoRef}
-        src={videoSrc}
-        autoPlay={true}
-        playsInline
-        className="absolute inset-0 w-full h-full object-contain"
-        onClick={togglePlay}
-      />
+      {videoSrc.includes('youtube') || videoSrc.includes('embed') ? (
+        <iframe
+          src={videoSrc}
+          title={title.title}
+          className="absolute inset-0 w-full h-full border-0 pointer-events-auto z-10"
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+          allowFullScreen
+          onLoad={() => setLoading(false)}
+        />
+      ) : (
+        <video
+          ref={videoRef}
+          src={videoSrc}
+          autoPlay={true}
+          playsInline
+          className="absolute inset-0 w-full h-full object-contain"
+          onClick={togglePlay}
+        />
+      )}
 
       {/* Loading spinner */}
       {loading && (

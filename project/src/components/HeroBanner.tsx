@@ -22,18 +22,36 @@ export default function HeroBanner({ title }: { title: Title }) {
   if (isKaTV) {
     return (
       <section 
-        onClick={() => navigate({ name: 'player', id: title.id })}
-        className="relative w-full overflow-hidden cursor-pointer group bg-black pt-16 sm:pt-20"
+        className="relative w-full overflow-hidden bg-black pt-12 sm:pt-14 lg:pt-16 select-none"
       >
-        <div className="relative w-full overflow-hidden h-[50vh] sm:h-[70vh] lg:h-[85vh]">
+        <div 
+          onClick={() => navigate({ name: 'player', id: title.id })}
+          className="relative w-full overflow-hidden cursor-pointer group bg-black"
+        >
           <img
-            src={title.backdrop}
+            src={title.backdrop || '/uploads/hero_banner.png'}
             alt={title.title}
-            className="absolute inset-0 w-full h-full object-cover transition-transform duration-1000 group-hover:scale-[1.02]"
+            className="w-full h-auto block object-contain transition-transform duration-700 group-hover:scale-[1.005]"
             onError={(e) => {
-              (e.target as HTMLImageElement).src = 'https://images.pexels.com/photos/7991579/pexels-photo-7991579.jpeg?auto=compress&cs=tinysrgb&w=1200';
+              (e.target as HTMLImageElement).src = '/katv-banner.png';
             }}
           />
+
+          {/* Interactive Watch Now Overlay Button positioned higher up under EXPERIENCE text */}
+          <div className="absolute bottom-[11%] right-[15%] sm:bottom-[14%] sm:right-[18%] lg:bottom-[16%] lg:right-[20%] xl:bottom-[17%] xl:right-[21%] z-20">
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                navigate({ name: 'player', id: title.id });
+              }}
+              className="flex items-center gap-2.5 px-6 py-3 sm:px-8 sm:py-3.5 rounded-full bg-gradient-to-r from-amber-400 via-amber-500 to-yellow-500 text-black font-extrabold text-xs sm:text-sm lg:text-base shadow-[0_0_25px_rgba(245,158,11,0.7)] hover:shadow-[0_0_35px_rgba(245,158,11,1)] hover:scale-105 active:scale-95 transition-all cursor-pointer"
+            >
+              <Play className="w-4 h-4 sm:w-5 sm:h-5 fill-black" />
+              <span>Watch Now</span>
+            </button>
+          </div>
+
+          <div className="absolute inset-x-0 bottom-0 h-12 bg-gradient-to-t from-ink-975 to-transparent pointer-events-none" />
         </div>
       </section>
     );

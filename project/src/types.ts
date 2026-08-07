@@ -102,4 +102,6 @@ export interface LiveChannel {
   viewers: string;
   isLive: boolean;
   backdrop: string;
+  videoUrl?: string;
+  apiKey?: string;
 }

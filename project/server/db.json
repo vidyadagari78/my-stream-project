@@ -13,6 +13,27 @@
       "password": "15e2b0d3c33891ebb0f1ef609ec419420c20e320ce94c65fbc8c3312448eb225",
       "fullName": "Subscriber",
       "createdAt": "2026-08-05T10:46:13.297Z"
+    },
+    {
+      "id": "u_76nr7ug",
+      "email": "vidyadagari78@gmail.com",
+      "password": "538940e75c7d4ac3fe66cdb3b3e1208bfa69da8ef41a4281cf9079588d9137d6",
+      "fullName": "vidya",
+      "createdAt": "2026-08-06T05:56:22.981Z"
+    },
+    {
+      "id": "u_yg4e63x",
+      "email": "test2@example.com",
+      "password": "a109e36947ad56de1dca1cc49f0ef8ac9ad9a7b1aa0df41fb3c4cb73c1ff01ea",
+      "fullName": "Test User",
+      "createdAt": "2026-08-06T07:11:03.764Z"
+    },
+    {
+      "id": "u_sg9xto3",
+      "email": "test3@example.com",
+      "password": "a109e36947ad56de1dca1cc49f0ef8ac9ad9a7b1aa0df41fb3c4cb73c1ff01ea",
+      "fullName": "Test User",
+      "createdAt": "2026-08-06T07:16:45.090Z"
     }
   ],
   "profiles": [

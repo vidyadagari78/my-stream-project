@@ -166,6 +166,15 @@ export default function Navbar() {
             Premium
           </button>
 
+          {/* Direct Sign In / Login Button */}
+          <button
+            onClick={() => navigate({ name: 'auth', mode: 'login' })}
+            className="flex items-center gap-1 sm:gap-1.5 px-2.5 sm:px-3.5 py-1.5 rounded-lg brand-gradient text-white font-bold text-xs sm:text-sm hover:scale-105 transition-all shadow-md cursor-pointer shrink-0 whitespace-nowrap"
+          >
+            <User size={15} />
+            <span className="hidden xs:inline">Sign In</span>
+          </button>
+
           {/* Profile */}
           <div className="relative">
             <button
