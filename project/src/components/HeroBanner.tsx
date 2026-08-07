@@ -38,7 +38,7 @@ export default function HeroBanner({ title }: { title: Title }) {
           />
 
           {/* Responsive Watch Now Overlay Button */}
-          <div className="absolute bottom-[16%] right-[8%] sm:bottom-[20%] sm:right-[15%] md:bottom-[22%] md:right-[18%] lg:bottom-[25%] lg:right-[20%] xl:bottom-[26%] xl:right-[21%] z-20">
+          <div className="absolute bottom-[10%] right-[8%] sm:bottom-[12%] sm:right-[15%] md:bottom-[13%] md:right-[18%] lg:bottom-[14%] lg:right-[20%] xl:bottom-[15%] xl:right-[21%] z-20">
             <button
               onClick={(e) => {
                 e.stopPropagation();
