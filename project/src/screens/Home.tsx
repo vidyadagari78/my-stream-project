@@ -97,11 +97,6 @@ export default function Home() {
 
       <div className="relative z-10 page-shell -mt-2 sm:-mt-3 lg:-mt-4">
         <div className="space-y-4 sm:space-y-5">
-          {liveChannels.length > 0 && (
-            <div id="row-live-tv">
-              <ContentRow title="🔴 Live TV & News Channels" titles={liveChannels} variant="large" />
-            </div>
-          )}
           {continueTitles.length > 0 && (
             <div id="row-continue">
               <ContentRow title="Continue Watching" titles={continueTitles} />
