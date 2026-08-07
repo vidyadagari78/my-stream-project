@@ -22,7 +22,7 @@ export default function HeroBanner({ title }: { title: Title }) {
   if (isKaTV) {
     return (
       <section 
-        className="relative w-full overflow-hidden bg-black pt-12 sm:pt-14 lg:pt-16 select-none"
+        className="relative w-full overflow-hidden bg-black pt-16 sm:pt-20 select-none"
       >
         <div 
           onClick={() => navigate({ name: 'player', id: title.id })}
@@ -37,21 +37,21 @@ export default function HeroBanner({ title }: { title: Title }) {
             }}
           />
 
-          {/* Interactive Watch Now Overlay Button positioned higher up under EXPERIENCE text */}
-          <div className="absolute bottom-[11%] right-[15%] sm:bottom-[14%] sm:right-[18%] lg:bottom-[16%] lg:right-[20%] xl:bottom-[17%] xl:right-[21%] z-20">
+          {/* Responsive Watch Now Overlay Button */}
+          <div className="absolute bottom-[8%] right-[6%] sm:bottom-[14%] sm:right-[18%] lg:bottom-[16%] lg:right-[20%] xl:bottom-[17%] xl:right-[21%] z-20">
             <button
               onClick={(e) => {
                 e.stopPropagation();
                 navigate({ name: 'player', id: title.id });
               }}
-              className="flex items-center gap-2.5 px-6 py-3 sm:px-8 sm:py-3.5 rounded-full bg-gradient-to-r from-amber-400 via-amber-500 to-yellow-500 text-black font-extrabold text-xs sm:text-sm lg:text-base shadow-[0_0_25px_rgba(245,158,11,0.7)] hover:shadow-[0_0_35px_rgba(245,158,11,1)] hover:scale-105 active:scale-95 transition-all cursor-pointer"
+              className="flex items-center gap-1.5 sm:gap-2.5 px-3.5 py-1.5 sm:px-8 sm:py-3.5 rounded-full bg-gradient-to-r from-amber-400 via-amber-500 to-yellow-500 text-black font-extrabold text-[11px] sm:text-sm lg:text-base shadow-[0_0_20px_rgba(245,158,11,0.6)] hover:shadow-[0_0_35px_rgba(245,158,11,1)] hover:scale-105 active:scale-95 transition-all cursor-pointer whitespace-nowrap"
             >
-              <Play className="w-4 h-4 sm:w-5 sm:h-5 fill-black" />
+              <Play className="w-3.5 h-3.5 sm:w-5 sm:h-5 fill-black" />
               <span>Watch Now</span>
             </button>
           </div>
 
-          <div className="absolute inset-x-0 bottom-0 h-12 bg-gradient-to-t from-ink-975 to-transparent pointer-events-none" />
+          <div className="absolute inset-x-0 bottom-0 h-8 sm:h-12 bg-gradient-to-t from-ink-975 to-transparent pointer-events-none" />
         </div>
       </section>
     );
