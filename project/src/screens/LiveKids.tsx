@@ -1,11 +1,11 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Radio, Play, Users, ChevronLeft, Baby, Sparkles, Key, Check, Plus, X, Globe, Download, RefreshCw, Rss, Layers } from 'lucide-react';
+import { Radio, Play, Users, ChevronLeft, Baby, Sparkles, Key, Check, Plus, X, RefreshCw, Layers } from 'lucide-react';
 import { useApp } from '../store';
 import { LIVE_CHANNELS, TITLES, byType } from '../data';
 import ContentRow from '../components/ContentRow';
 import type { LiveChannel } from '../types';
-import { parseM3U, IPTV_PRESETS, KANNADA_LIVE_CHANNELS, KANNADA_MUSIC_CHANNELS, MUSIC_LIVE_CHANNELS, MOVIE_LIVE_CHANNELS, ENGLISH_LIVE_CHANNELS, type IPTVSource } from '../utils/m3uParser';
+import { parseM3U, KANNADA_LIVE_CHANNELS, KANNADA_MUSIC_CHANNELS, MUSIC_LIVE_CHANNELS, MOVIE_LIVE_CHANNELS, ENGLISH_LIVE_CHANNELS, type IPTVSource } from '../utils/m3uParser';
 
 export function Live() {
   const { back, navigate, liveChannels, setLiveChannels } = useApp();
@@ -18,10 +18,7 @@ export function Live() {
   const [customUrl, setCustomUrl] = useState('');
   const [savedSuccess, setSavedSuccess] = useState(false);
 
-  const [loadingPreset, setLoadingPreset] = useState<string | null>(null);
-  const [activePreset, setActivePreset] = useState<string | null>('english_live_api');
-  const [epgGuideUrl, setEpgGuideUrl] = useState<string>('https://iptv-org.github.io/epg/guides/in.xml');
-  const [presetStatus, setPresetStatus] = useState<string>('Loaded English, Kannada, News, Movies & Songs Live TV Streams (24x7)');
+
 
   const updateChannels = (newChs: LiveChannel[]) => {
     setChannelsState(newChs);
@@ -51,47 +48,32 @@ export function Live() {
   const handleFetchIPTVPreset = async (preset: IPTVSource) => {
     if (preset.type === 'english') {
       updateChannels(ENGLISH_LIVE_CHANNELS);
-      setActivePreset(preset.id);
-      setPresetStatus(`Loaded ${ENGLISH_LIVE_CHANNELS.length} English Live 24x7 TV Channels`);
       return;
     }
 
     if (preset.type === 'kannada_music') {
       updateChannels(KANNADA_MUSIC_CHANNELS);
-      setActivePreset(preset.id);
-      setPresetStatus(`Loaded ${KANNADA_MUSIC_CHANNELS.length} Kannada Music 24x7 Live TV Channels`);
       return;
     }
 
     if (preset.type === 'kannada') {
       updateChannels(KANNADA_LIVE_CHANNELS);
-      setActivePreset(preset.id);
-      setPresetStatus(`Loaded ${KANNADA_LIVE_CHANNELS.length} Kannada Live TV Channels & API streams`);
       return;
     }
 
     if (preset.type === 'movies') {
       updateChannels(MOVIE_LIVE_CHANNELS);
-      setActivePreset(preset.id);
-      setPresetStatus(`Loaded ${MOVIE_LIVE_CHANNELS.length} Movies Live TV Channels`);
       return;
     }
 
     if (preset.type === 'music') {
       updateChannels(MUSIC_LIVE_CHANNELS);
-      setActivePreset(preset.id);
-      setPresetStatus(`Loaded ${MUSIC_LIVE_CHANNELS.length} Songs & Music Live TV Channels`);
       return;
     }
 
     if (preset.type === 'epg') {
-      setEpgGuideUrl(preset.url);
-      setPresetStatus(`EPG XML Guide linked: ${preset.name} (${preset.url})`);
       return;
     }
-
-    setLoadingPreset(preset.id);
-    setPresetStatus(`Loading live channels from ${preset.name}...`);
 
     try {
       // Try direct fetch or backend proxy
@@ -116,19 +98,13 @@ export function Live() {
         const parsed = parseM3U(rawText, preset.name);
         if (parsed.length > 0) {
           updateChannels(parsed);
-          setActivePreset(preset.id);
-          setPresetStatus(`Successfully loaded ${parsed.length} channels from ${preset.name}`);
-        } else {
-          setPresetStatus(`No valid channels found in ${preset.name}`);
         }
       }
     } catch (err: any) {
       console.error('IPTV load error:', err);
-      setPresetStatus(`Error loading ${preset.name}: ${err.message || 'Network error'}`);
-    } finally {
-      setLoadingPreset(null);
     }
   };
+
 
   const handleAddCustomChannel = (e: React.FormEvent) => {
     e.preventDefault();
@@ -197,83 +173,8 @@ export function Live() {
               <p className="text-white/60 text-sm">{filteredChannels.length} active broadcast channels streaming</p>
             </div>
           </div>
-
-          <div className="flex items-center gap-3 flex-wrap">
-            <button
-              onClick={() => {
-                updateChannels(LIVE_CHANNELS);
-                setActivePreset('default');
-                setPresetStatus('Restored default curated channels');
-              }}
-              className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl glass text-xs font-bold hover:bg-white/10 transition-colors"
-            >
-              <RefreshCw size={14} /> Reset Channels
-            </button>
-            <button
-              onClick={() => {
-                setTempKey(apiKey);
-                setShowKeyModal(true);
-              }}
-              className="flex items-center gap-2 px-4 py-2.5 rounded-xl glass border border-white/20 hover:border-amber-400/50 text-white font-bold text-sm hover:scale-105 active:scale-95 transition-all shadow-lg"
-            >
-              <Key size={18} className="text-amber-400" />
-              <span>{apiKey ? 'API Key Linked' : 'Connect API Key / IPTV'}</span>
-              {apiKey && <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />}
-            </button>
-          </div>
         </div>
 
-        {/* IPTV Preset Providers Banner */}
-        <div className="mb-6 p-5 rounded-2xl glass border border-white/15 bg-gradient-to-r from-ink-950 via-purple-950/20 to-black">
-          <div className="flex items-center justify-between gap-2 mb-3">
-            <div className="flex items-center gap-2 text-white font-bold text-sm">
-              <Globe size={18} className="text-brand-400" />
-              <span>IPTV Free API Playlists & EPG Guides</span>
-            </div>
-            <span className="text-xs text-white/50">Official Public Streams</span>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-            {IPTV_PRESETS.map((preset) => {
-              const isSelected = activePreset === preset.id;
-              const isLoading = loadingPreset === preset.id;
-              return (
-                <button
-                  key={preset.id}
-                  onClick={() => handleFetchIPTVPreset(preset)}
-                  disabled={isLoading}
-                  className={`p-3.5 rounded-xl text-left border transition-all flex flex-col justify-between ${
-                    isSelected
-                      ? 'bg-brand-500/20 border-brand-400 text-white shadow-lg shadow-brand-500/20 ring-1 ring-brand-400'
-                      : 'bg-white/5 border-white/10 hover:border-white/30 text-white/80 hover:text-white hover:bg-white/10'
-                  }`}
-                >
-                  <div>
-                    <div className="flex items-center justify-between gap-1 mb-1">
-                      <span className="font-extrabold text-sm truncate">{preset.name}</span>
-                      <span className="px-2 py-0.5 rounded text-[10px] font-black bg-white/10 text-brand-300 whitespace-nowrap">{preset.badge}</span>
-                    </div>
-                    <p className="text-xs text-white/60 line-clamp-2 leading-relaxed mb-3">{preset.description}</p>
-                  </div>
-                  <div className="flex items-center justify-between text-xs font-bold text-brand-400 pt-2 border-t border-white/10">
-                    <span className="flex items-center gap-1">
-                      {preset.type === 'epg' ? <Rss size={13} /> : <Download size={13} />}
-                      {preset.type === 'epg' ? 'Link EPG Guide' : 'Load Stream Playlist'}
-                    </span>
-                    {isLoading && <RefreshCw size={13} className="animate-spin text-amber-400" />}
-                  </div>
-                </button>
-              );
-            })}
-          </div>
-
-          {presetStatus && (
-            <div className="mt-3 text-xs font-mono px-3 py-2 rounded-lg bg-black/50 text-amber-300 border border-amber-500/30 flex items-center justify-between">
-              <span>{presetStatus}</span>
-              <span className="text-white/40 text-[10px]">EPG: {epgGuideUrl}</span>
-            </div>
-          )}
-        </div>
 
         {/* API Key Banner Indicator */}
         {apiKey && (

@@ -74,6 +74,30 @@ export const ENGLISH_LIVE_CHANNELS: LiveChannel[] = [
 
 export const KANNADA_MUSIC_CHANNELS: LiveChannel[] = [
   {
+    id: 'l_gyaranti_news',
+    name: 'Gyaranti News Live (ಗ್ಯಾರಂಟಿ ನ್ಯೂಸ್ 24x7)',
+    category: 'Kannada News',
+    logo: 'https://img.youtube.com/vi/XaSnibCLVJA/hqdefault.jpg',
+    nowPlaying: 'Gyaranti News Live 24x7 Breaking News & State Updates',
+    nextUp: 'Prime Time Special Bulletin',
+    viewers: '3.8M',
+    isLive: true,
+    backdrop: 'https://img.youtube.com/vi/XaSnibCLVJA/hqdefault.jpg',
+    videoUrl: 'https://www.youtube.com/watch?v=XaSnibCLVJA',
+  },
+  {
+    id: 'l_aswamegha_news',
+    name: 'Aswamegha Live (ಅಶ್ವಮೇಘ 24x7)',
+    category: 'Kannada News',
+    logo: 'https://img.youtube.com/vi/idL8zhF17Cs/hqdefault.jpg',
+    nowPlaying: 'Aswamegha Live News & Cultural Updates',
+    nextUp: 'Aswamegha Prime Hour',
+    viewers: '2.9M',
+    isLive: true,
+    backdrop: 'https://img.youtube.com/vi/idL8zhF17Cs/hqdefault.jpg',
+    videoUrl: 'https://www.youtube.com/watch?v=idL8zhF17Cs',
+  },
+  {
     id: 'l_7s_music_kn',
     name: '7S Music Live (7S ಮ್ಯೂಸಿಕ್ 24x7)',
     category: 'Kannada & South Music Live',

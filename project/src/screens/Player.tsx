@@ -365,9 +365,15 @@ export default function Player({ id, episodeId }: { id: string; episodeId?: stri
       }}
       onDoubleClick={toggleFullscreen}
     >
-      {videoSrc.includes('youtube') || videoSrc.includes('embed') ? (
+      {videoSrc.includes('youtube') || videoSrc.includes('embed') || videoSrc.includes('youtu.be') ? (
         <iframe
-          src={videoSrc}
+          src={
+            videoSrc.includes('watch?v=')
+              ? `https://www.youtube.com/embed/${videoSrc.split('v=')[1]?.split('&')[0]}?autoplay=1`
+              : videoSrc.includes('youtu.be/')
+              ? `https://www.youtube.com/embed/${videoSrc.split('youtu.be/')[1]?.split('?')[0]}?autoplay=1`
+              : videoSrc
+          }
           title={title.title}
           className="absolute inset-0 w-full h-full border-0 pointer-events-auto z-10"
           allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
